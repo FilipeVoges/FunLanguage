@@ -34,7 +34,13 @@ boolean Menosshort = false; //saida resumida
       System.out.println("Reading from standard input ...");
       parser = new Fun(System.in);
      else{ //le do arquivo
-      filename = args[args.length-1]
+      filename = args[args.length-1];
+      System.out.println("Reading from file " + filename + " ..");
+      try{
+  
+  
+  
+  
      
     while (true)
     {
