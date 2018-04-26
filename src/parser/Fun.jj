@@ -19,8 +19,23 @@ boolean Menosshort = false; //saida resumida
     int i;
     boolean ms = false;
     
+    System.out.println(Version); //le os parametros passados para o compilador
     
+    for ( i = 0; i < args.lenght - 1; i++){
+      if(args[i].toLowerCase().equals("-short"))
+        ms = true;
+      else{
+        System.out.println("Usage is: java Fun [-short] inputfile");
+        System.exit(0);
+      }
+    }
     
+    if(args[i].equals("-"){ //le da entrada-padrao
+      System.out.println("Reading from standard input ...");
+      parser = new Fun(System.in);
+     else{ //le do arquivo
+      filename = args[args.length-1]
+     
     while (true)
     {
       System.out.println("Reading from standard input...");
