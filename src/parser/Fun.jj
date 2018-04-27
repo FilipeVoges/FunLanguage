@@ -10,68 +10,16 @@ PARSER_BEGIN(Fun)
 package parser;
 
 public class Fun{
-final static string Version = "Fun compiler - version 1.0";
-boolean Menosshort = false; //saida resumida
+  final static String Version = "Fun compiler - version 1.0";
+  boolean Menosshort = false; //saida resumida
 
   public static void main(String args []) throws ParseException {
-    String filename = ""; // nome do arquiva analisado
+    String filename = ""; // nome do arquivo analisado
     Fun parser = new Fun(System.in); // analisador lexico
     int i;
     boolean ms = false;
-    
     System.out.println(Version); //le os parametros passados para o compilador
-    
-    for ( i = 0; i < args.lenght - 1; i++){
-      if(args[i].toLowerCase().equals("-short"))
-        ms = true;
-      else{
-        System.out.println("Usage is: java Fun [-short] inputfile");
-        System.exit(0);
-      }
-    }
-    
-    if(args[i].equals("-"){ //le da entrada-padrao
-      System.out.println("Reading from standard input ...");
-      parser = new Fun(System.in);
-     else{ //le do arquivo
-      filename = args[args.length-1];
-      System.out.println("Reading from file " + filename + " ..");
-      try{
-        parser = new Fun(new java.oi.FileInputStream (filename));
-      }
-      catch (java.oi.FileNotFoundExpection e) {
-        System.out.println("File" + filename + "not found.");
-        return;
-      }
-    }
-    parser.Menosshort = ms;
-    parser.program(); // chama o metodo q faz a analise
-    
-    //verifica se houve erro lexico
-    if(parser.token_source.foundLexError() != 0 )
-      System.out.println(parser.token_source.foundLexError() + "Lexical erros found");
-     else
-      System.out.println("Program successfully analized.")
-   } //main
-   
-   
-   static public String im (int x){
-   //metodo auxiliar
-   int k; String s;
-    s = tokenImage[x];
-    k = s.lastIndexOf(("\");
-    try {s = s.substring(1,k);}
-    catch (StringIndexOutOfBoundsException e )
-    {}
-    return s;
-    }
-    
-    } //Fun
-    
-    PARSER_END(Fun)
-  
-  
-     
+
     while (true)
     {
       System.out.println("Reading from standard input...");
@@ -118,67 +66,116 @@ SKIP :
 
 TOKEN : /* OPERATORS */
 {
-  < PLUS : "+" >
-| < MINUS : "-" >
-| < MULTIPLY : "*" >
-| < DIVIDE : "/" >
+< ASSIGN: "=" >
+| < GT: ">" >
+| < LT: "<" >
+| < BANG: "!" >
+| < TILDE: "~" >
+| < HOOK: "?" >
+| < COLON: ":" >
+| < EQ: "==" >
+| < LE: "<=" >
+| < GE: ">=" >
+| < NE: "!=" >
+| < SC_OR: "||" >
+| < SC_AND: "&&" >
+| < INCR: "++" >
+| < DECR: "--" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < MULTIPLY: "*" >
+| < DIVIDE: "/" >
+| < BIT_AND: "&" >
+| < BIT_OR: "|" >
+| < XOR: "^" >
+| < REM: "%" >
+| < LSHIFT: "<<" >
+| < RSIGNEDSHIFT: ">>" >
+| < RUNSIGNEDSHIFT: ">>>" >
+| < PLUSASSIGN: "+=" >
+| < MINUSASSIGN: "-=" >
+| < STARASSIGN: "*=" >
+| < SLASHASSIGN: "/=" >
+| < ANDASSIGN: "&=" >
+| < ORASSIGN: "|=" >
+| < XORASSIGN: "^=" >
+| < REMASSIGN: "%=" >
+| < LSHIFTASSIGN: "<<=" >
+| < RSIGNEDSHIFTASSIGN: ">>=" >
+| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
 }
 
-TOKEN :
+SPECIAL_TOKEN : /* COMMENTS */
 {
-  < CONSTANT : (< DIGIT >)+ >
-| < #DIGIT : [ "0"-"9" ] >
+  <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+| <FORMAL_COMMENT: "/**" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+| <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 }
 
-int one_line() :
+
+TOKEN : /* LITERALS */
+{
+  < INTEGER_LITERAL:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+  >
+| < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+| < CHARACTER_LITERAL:
+      "'"
+      (   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )
+      "'"
+  >
+| < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  >
+}
+
+void program() :
 {}
 {
-  sum() ";"
-  {
-    return 0;
-  }
-| ";"
-  {
-    return 1;
-  }
-}
-
-void sum() :
-{}
-{
-  term()
   (
-    (
-      < PLUS >
-    | < MINUS >
-    )
-    term()
+    <PLUS> { System.out.println("Reconheceu PLUS"); } 
+  | <MINUS> { System.out.println("Reconheceu MINUS"); } 
+  | <MULTIPLY> { System.out.println("Reconheceu MULTIPLY"); } 
+  | <DIVIDE> { System.out.println("Reconheceu DIVIDE"); }  
   )*
-}
+} 
 
-void term() :
+void BooleanLiteral() :
 {}
 {
-  unary()
-  (
-    (
-      < MULTIPLY >
-    | < DIVIDE >
-    )
-    unary()
-  )*
+  "true"
+|
+  "false"
 }
 
-void unary() :
-{}
-{
-  < MINUS > element()
-| element()
-}
-
-void element() :
-{}
-{
-  < CONSTANT >
-| "(" sum() ")"
-}
