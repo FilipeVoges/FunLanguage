@@ -37,8 +37,38 @@ boolean Menosshort = false; //saida resumida
       filename = args[args.length-1];
       System.out.println("Reading from file " + filename + " ..");
       try{
-  
-  
+        parser = new Fun(new java.oi.FileInputStream (filename));
+      }
+      catch (java.oi.FileNotFoundExpection e) {
+        System.out.println("File" + filename + "not found.");
+        return;
+      }
+    }
+    parser.Menosshort = ms;
+    parser.program(); // chama o metodo q faz a analise
+    
+    //verifica se houve erro lexico
+    if(parser.token_source.foundLexError() != 0 )
+      System.out.println(parser.token_source.foundLexError() + "Lexical erros found");
+     else
+      System.out.println("Program successfully analized.")
+   } //main
+   
+   
+   static public String im (int x){
+   //metodo auxiliar
+   int k; String s;
+    s = tokenImage[x];
+    k = s.lastIndexOf(("\");
+    try {s = s.substring(1,k);}
+    catch (StringIndexOutOfBoundsException e )
+    {}
+    return s;
+    }
+    
+    } //Fun
+    
+    PARSER_END(Fun)
   
   
      
