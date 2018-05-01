@@ -3,58 +3,92 @@
  */
 options
 {
-  static = true;
+  STATIC = false; // permite mais de um AL e AS, o que da flexibilidade
 }
 
 PARSER_BEGIN(Fun)
 package parser;
+  import java.io.*;
 
 public class Fun{
+  
   final static String Version = "Fun compiler - version 1.0";
-  boolean Menosshort = false; //saida resumida
+  boolean Menosshort = false; //saida resumida = falso
 
   public static void main(String args []) throws ParseException {
     String filename = ""; // nome do arquivo analisado
-    Fun parser = new Fun(System.in); // analisador lexico
+    Fun parser; // analisador lexico
     int i;
     boolean ms = false;
+    
     System.out.println(Version); //le os parametros passados para o compilador
 
-    while (true)
+    for (i=0; i<args.length - 1; i++)
     {
+      if( args[i].toLowerCase().equals("-short") )
+      	ms = true;
+      else
+      {
+		System.out.println("inputfile");
+		System.exit(0);
+      }
+  	}
+
+  	if (args[i].equals("-"))
+  	{ 	//le da entrada padrao
       System.out.println("Reading from standard input...");
-      System.out.print("Enter an expression like \"1+(2+3)*4;\" :");
-      try
-      {
-        switch (Fun.one_line())
-        {
-          case 0 : 
-          System.out.println("OK.");
-          break;
-          case 1 : 
-          System.out.println("Goodbye.");
-          break;
-          default : 
-          break;
-        }
-      }
-      catch (Exception e)
-      {
-        System.out.println("NOK.");
-        System.out.println(e.getMessage());
-        Fun.ReInit(System.in);
-      }
-      catch (Error e)
-      {
-        System.out.println("Oops.");
-        System.out.println(e.getMessage());
-        break;
-      }
-    }
-  }
-}
+      parser = new Fun(System.in);
+  	}
+  	else
+  	{	// le do arquivo
+		filename = args[args.length-1];
+		System.out.println("Reading from file " + filename);
+		try {
+		  parser = new Fun(new java.io.FileInputStream(filename));
+		}
+		catch (java.io.FileNotFoundException e) {
+		  System.out.println("File not found");
+		  return;
+		}
+  	}
+  	parser.Menosshort = ms;
+  	parser.program(); //chama metodo que faz analise
+
+  	//verifica se houve erro lexico
+
+  if (parser.token_source.foundLexError() != 0 )
+  	System.out.println( parser.token_source.foundLexError() + " Lexical errors found");
+
+  else
+  	System.out.println("Program successfully analized.");
+} // main
+
+static public String im(int x) //metodo auxiliar
+{
+  int k;
+  String s;
+  	s = tokenImage[x];
+  	k = s.lastIndexOf("\"");
+  	try { s=s.substring(1,k); }
+  	catch (StringIndexOutOfBoundsException e)
+  	{ }
+  	return s;
+ }
+
+} //FUN
+
 
 PARSER_END(Fun)
+
+TOKEN_MGR_DECLS :
+{
+  int countLexError = 0;
+
+  public int foundLexError() {
+    return countLexError;
+  }
+
+}
 
 SKIP :
 {
@@ -62,12 +96,32 @@ SKIP :
 | "\r"
 | "\t"
 | "\n"
+| "\f"
 }
 
-TOKEN : /* OPERATORS */
+TOKEN : /* Palavras Reservadas */
 {
 < ASSIGN: "=" >
-| < GT: ">" >
+| < BREAK: "break" >
+| < CLASS: "class" >
+| < CONSTRUCTOR: "constructor" >
+| < ELSE: "else" >
+| < EXTENDS: "extends" >
+| < FOR: "for" >
+| < IF: "if" >
+| < INT: "int" >
+| < NEW: "new" >
+| < PRINT: "print" >
+| < READ: "read" >
+| < RETURN: "return" >
+| < STRING: "string" >
+| < SUPER: "super" >
+}
+
+
+TOKEN : /* Operadores */
+{
+  < GT: ">" >
 | < LT: "<" >
 | < BANG: "!" >
 | < TILDE: "~" >
@@ -104,6 +158,42 @@ TOKEN : /* OPERATORS */
 | < RSIGNEDSHIFTASSIGN: ">>=" >
 | < RUNSIGNEDSHIFTASSIGN: ">>>=" >
 }
+
+TOKEN : /* Operadores */
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+TOKEN : /* Constantes*/
+{
+  < int_constant: (
+    (["0"-"9"] (["0"-"9"])* ) |
+	(["0"-"7"] (["0"-"7"])* ["o", "O"] ) |
+	(["0"-"9"] (["0"-"7","A"-"F","a"-"f"])* ["h", "H"] ) |
+	(["0"-"1"] (["0"-"1"])* ["b","B"])
+   ) >
+|
+	<  string_constant:		//constante string como "abcd"
+		"\""( ~ ["\"","n", "\r"])* "\"" >
+}
+
+TOKEN : /* identificadores*/
+{
+  < INDENT: < LETTER > (< LETTER >|< DIGIT >)* >
+|
+  < #LETTER:["A"-"Z","a"-"z"] >
+|
+  < #DIGIT:["0"-"9"] >
+}
+
 
 SPECIAL_TOKEN : /* COMMENTS */
 {
@@ -177,5 +267,4 @@ void BooleanLiteral() :
   "true"
 |
   "false"
-}
 
