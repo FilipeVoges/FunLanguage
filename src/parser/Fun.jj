@@ -99,10 +99,78 @@ SKIP :
 | "\f"
 }
 
+SKIP :
+{
+	"/*": multilinecomment
+}
+
+
+< multilinecomment > SKIP:
+{
+	"*/" : DEFAULT
+| 	< ~[] >
+}
+
+SKIP :
+{
+	"//": singlelinecomment
+}
+
+< singlelinecomment > SKIP:
+{
+	<["\n","\r"]> : DEFAULT
+| 	< ~[] >
+}
+
+SPECIAL_TOKEN:
+{
+< INVALID_LEXICAL:
+(~ ["a"-"z", "A"-"Z",
+	"0"-"9",
+	"\"",
+	"(",
+	")",
+	"[",
+	"]",
+	"{",
+	"}",
+	";",
+	",",
+	".",
+	"=",
+	"<",
+	">",
+	"!",
+	"+",
+	"-",
+	"*",
+	"/",
+	"%",
+	" ",
+	"\t",
+	"\n",
+	"\r",
+	"\f"
+	])+ >
+		{
+		  System.err.println("Line " + input_stream.getEndLine()+ " - Invalid string found: " +image);
+		  countLexError++;
+		}
+|
+	< INVALID_CONST:
+	"\"" (~ ["\n", "\r", "\""])* ["\n", "\r"] >
+	{
+	  	System.err.println("Line " + input_stream.getEndLine() + " - String constant has a \\n: " + image);
+
+	  	countLexError++;
+	 }
+
+}
+		  
+
 TOKEN : /* Palavras Reservadas */
 {
-< ASSIGN: "=" >
-| < BREAK: "break" >
+  < BREAK: "break" >
 | < CLASS: "class" >
 | < CONSTRUCTOR: "constructor" >
 | < ELSE: "else" >
@@ -121,42 +189,18 @@ TOKEN : /* Palavras Reservadas */
 
 TOKEN : /* Operadores */
 {
-  < GT: ">" >
+  < ASSIGN: "=" >
+| < GT: ">" >
 | < LT: "<" >
-| < BANG: "!" >
-| < TILDE: "~" >
-| < HOOK: "?" >
-| < COLON: ":" >
 | < EQ: "==" >
 | < LE: "<=" >
 | < GE: ">=" >
-| < NE: "!=" >
-| < SC_OR: "||" >
-| < SC_AND: "&&" >
-| < INCR: "++" >
-| < DECR: "--" >
+| < NEQ: "!=" >
 | < PLUS: "+" >
 | < MINUS: "-" >
-| < MULTIPLY: "*" >
-| < DIVIDE: "/" >
-| < BIT_AND: "&" >
-| < BIT_OR: "|" >
-| < XOR: "^" >
+| < STAR: "*" >
+| < SLASH: "/" >
 | < REM: "%" >
-| < LSHIFT: "<<" >
-| < RSIGNEDSHIFT: ">>" >
-| < RUNSIGNEDSHIFT: ">>>" >
-| < PLUSASSIGN: "+=" >
-| < MINUSASSIGN: "-=" >
-| < STARASSIGN: "*=" >
-| < SLASHASSIGN: "/=" >
-| < ANDASSIGN: "&=" >
-| < ORASSIGN: "|=" >
-| < XORASSIGN: "^=" >
-| < REMASSIGN: "%=" >
-| < LSHIFTASSIGN: "<<=" >
-| < RSIGNEDSHIFTASSIGN: ">>=" >
-| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
 }
 
 TOKEN : /* Operadores */
@@ -195,35 +239,13 @@ TOKEN : /* identificadores*/
 }
 
 
-SPECIAL_TOKEN : /* COMMENTS */
-{
-  <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
-| <FORMAL_COMMENT: "/**" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
-| <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
-}
-
-
 TOKEN : /* LITERALS */
 {
-  < INTEGER_LITERAL:
-        <DECIMAL_LITERAL> (["l","L"])?
-      | <HEX_LITERAL> (["l","L"])?
-      | <OCTAL_LITERAL> (["l","L"])?
-  >
-|
-  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
-|
-  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
-|
-  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
-|
+  
   < FLOATING_POINT_LITERAL:
-        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
-      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
-      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
-      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+        (["0"-"9"])+ "." (["0"-"9"])*
   >
-| < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+  
 | < CHARACTER_LITERAL:
       "'"
       (   (~["'","\\","\n","\r"])
@@ -236,6 +258,7 @@ TOKEN : /* LITERALS */
       )
       "'"
   >
+| < BOOLEAN: "true" | "false">
 | < STRING_LITERAL:
       "\""
       (   (~["\"","\\","\n","\r"])
@@ -256,8 +279,8 @@ void program() :
   (
     <PLUS> { System.out.println("Reconheceu PLUS"); } 
   | <MINUS> { System.out.println("Reconheceu MINUS"); } 
-  | <MULTIPLY> { System.out.println("Reconheceu MULTIPLY"); } 
-  | <DIVIDE> { System.out.println("Reconheceu DIVIDE"); }  
+  | <STAR> { System.out.println("Reconheceu STAR"); } 
+  | <SLASH> { System.out.println("Reconheceu SLASH"); }  
   )*
 } 
 
@@ -267,4 +290,4 @@ void BooleanLiteral() :
   "true"
 |
   "false"
-
+}
