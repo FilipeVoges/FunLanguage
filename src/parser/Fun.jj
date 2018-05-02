@@ -8,6 +8,33 @@ options
 
 PARSER_BEGIN(Fun)
 package parser;
+import java.io.*;
+
+public class Fun
+{
+  public static void main(String args []) throws ParseException
+  {
+    Fun parser = new Fun(System.in);
+	try { 
+    	parser.program();
+  	} catch (ParseException e) {
+  		System.out.println(e);
+  	} catch (TokenMgrError e) {
+  	  	System.out.println(e);
+  	}
+  	 if (parser.token_source.foundLexError() != 0 )
+  		System.out.println( parser.token_source.foundLexError() + " Lexical errors found");
+
+ 	 else
+  		System.out.println("Program successfully analized.");
+	}
+}
+
+
+PARSER_END(Fun)
+/*
+PARSER_BEGIN(Fun)
+package parser;
   import java.io.*;
 
 public class Fun{
@@ -16,20 +43,20 @@ public class Fun{
   boolean Menosshort = false; //saida resumida = falso
 
   public static void main(String args []) throws ParseException {
-    String filename = ""; // nome do arquivo analisado
+    String filename = "file"; // nome do arquivo analisado
     Fun parser; // analisador lexico
     int i;
     boolean ms = false;
     
     System.out.println(Version); //le os parametros passados para o compilador
 
-    for (i=0; i<args.length - 1; i++)
+    for (i = 0; i < args.length - 1; i++)
     {
       if( args[i].toLowerCase().equals("-short") )
       	ms = true;
       else
       {
-		System.out.println("inputfile");
+		System.out.println("Usage is: java langX [-short] inputfile");
 		System.exit(0);
       }
   	}
@@ -79,6 +106,8 @@ static public String im(int x) //metodo auxiliar
 
 
 PARSER_END(Fun)
+
+*/
 
 TOKEN_MGR_DECLS :
 {
@@ -215,6 +244,15 @@ TOKEN : /* Operadores */
 | < COMMA: "," >
 | < DOT: "." >
 }
+
+TOKEN : /* Operadores */
+{
+  < AND: "and" >
+| < OR: "or" >
+| < NOT: "not" >
+| < XOR: "xor" >
+}
+
 
 TOKEN : /* Constantes*/
 {
